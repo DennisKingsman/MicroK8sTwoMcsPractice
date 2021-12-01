@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcs-one
+  labels:
+    app: mcs-one
+spec:
+  selector:
+    matchLabels:
+      app: mcs-one
+  template:
+    metadata:
+      labels:
+        app: mcs-one
+    spec:
+      containers:
+        - name: mcs-one
+          image: localhost:32000/mcs1
+          ports:
+            - containerPort: 8083
+          volumeMounts:
+            - name: config-volume
+              mountPath: /workspace/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: mcs-one-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcs-one-service
+spec:
+  selector:
+    app: mcs-one
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8083
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcs-one-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/mcs-one/(.+)"
+            pathType: Prefix
+            backend:
+              service:
+                name: mcs-one-service
+                port:
+                  number: 80
+---

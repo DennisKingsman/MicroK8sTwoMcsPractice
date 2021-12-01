@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcs-two
+  labels:
+    app: mcs-two
+spec:
+  selector:
+    matchLabels:
+      app: mcs-two
+  template:
+    metadata:
+      labels:
+        app: mcs-two
+    spec:
+      containers:
+        - name: mcs-two
+          image: localhost:32000/mcs2
+          ports:
+            - containerPort: 8084
+          volumeMounts:
+            - name: config-volume
+              mountPath: /workspace/config-two
+      volumes:
+        - name: config-volume
+          configMap:
+            name: mcs-two-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcs-two-service
+spec:
+  selector:
+    app: mcs-two
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8084
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcs-two-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: "/mcs-two/(.+)"
+            pathType: Prefix
+            backend:
+              service:
+                name: mcs-two-service
+                port:
+                  number: 80
+---
