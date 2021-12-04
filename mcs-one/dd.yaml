@@ -21,6 +21,10 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /workspace/config
+        - name: mcs-two
+          image: localhost:32000/mcs2
+          ports:
+            - containerPort: 8084
       volumes:
         - name: config-volume
           configMap:
@@ -37,6 +41,18 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcs-two-service
+spec:
+  selector:
+    app: mcs-two
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8084
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
