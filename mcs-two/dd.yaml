@@ -18,13 +18,6 @@ spec:
           image: localhost:32000/mcs2
           ports:
             - containerPort: 8084
-          volumeMounts:
-            - name: config-volume
-              mountPath: /workspace/config-two
-      volumes:
-        - name: config-volume
-          configMap:
-            name: mcs-two-config
 ---
 apiVersion: v1
 kind: Service
